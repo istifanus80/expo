@@ -1,0 +1,83 @@
+import React, { useState } from 'react'; import { View, Text, TouchableOpacity, Switch, TextInput, ScrollView } from 'react-native';
+
+// Humble Isti Trading Robot - Single-file Expo-ready React component // Notes: drop this into an Expo project (App.js) or use as a screen component.
+
+export default function App() { const defaultSymbols = ['EURUSD','GBPUSD','USDJPY','XAUUSD','XRPUSD','US30']; const themes = { gold: { bg: '#1f1b18', card: '#2d241f', accent: '#d4af37', text: '#fff' }, dark: { bg: '#0b1220', card: '#0f1724', accent: '#06b6d4', text: '#e6eef6' }, blue: { bg: '#f3f8ff', card: '#e6f0ff', accent: '#1e40af', text: '#0b1220' } };
+
+const [running, setRunning] = useState(false); const [symbols, setSymbols] = useState(defaultSymbols); const [selected, setSelected] = useState(new Set(['EURUSD','GBPUSD'])); const [lots, setLots] = useState('0.01'); const [maxTrades, setMaxTrades] = useState('10'); const [direction, setDirection] = useState('Both'); const [confirmBeforeTrade, setConfirmBeforeTrade] = useState(true); const [reopenAfterTP, setReopenAfterTP] = useState(true); const [themeName, setThemeName] = useState('gold'); const theme = themes[themeName];
+
+// lightweight fake stats (placeholder for real connection to MT5) const [balance, setBalance] = useState(1000.00); const [equity, setEquity] = useState(1000.00); const [openTradesCount, setOpenTradesCount] = useState(0);
+
+function toggleSymbol(sym) { const copy = new Set(selected); if(copy.has(sym)) copy.delete(sym); else copy.add(sym); setSelected(copy); }
+
+return ( <View style={{ flex:1, backgroundColor: theme.bg, padding: 16 }}> <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' }}> <Text style={{ color: theme.accent, fontSize:20, fontWeight:'700' }}>Humble Isti Trading Robot 🤖</Text> <View> <TouchableOpacity onPress={() => setThemeName('gold')} style={{ marginBottom:6 }}> <Text style={{ color: theme.text }}>Theme: {themeName}</Text> </TouchableOpacity> </View> </View>
+
+<View style={{ marginTop:12, padding:12, borderRadius:10, backgroundColor: theme.card }}>
+    <Text style={{ color: theme.text, fontWeight:'600' }}>Account</Text>
+    <Text style={{ color: theme.text, marginTop:6 }}>Balance: ${balance.toFixed(2)}</Text>
+    <Text style={{ color: theme.text }}>Equity: ${equity.toFixed(2)}</Text>
+    <Text style={{ color: theme.text }}>Active trades: {openTradesCount}</Text>
+  </View>
+
+  <ScrollView style={{ marginTop:12 }}>
+    <View style={{ padding:12, borderRadius:10, backgroundColor: theme.card }}>
+      <Text style={{ color: theme.text, fontWeight:'600' }}>Symbols (tap to toggle)</Text>
+      <View style={{ flexDirection:'row', flexWrap:'wrap', marginTop:8 }}>
+        {symbols.map((s) => (
+          <TouchableOpacity key={s} onPress={() => toggleSymbol(s)} style={{ padding:8, margin:6, borderRadius:8, backgroundColor: selected.has(s) ? theme.accent : 'transparent', borderWidth:1, borderColor: theme.text }}>
+            <Text style={{ color: selected.has(s) ? theme.bg : theme.text }}>{s}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={{ marginTop:12 }}>
+        <Text style={{ color: theme.text }}>Lots</Text>
+        <TextInput value={lots} onChangeText={setLots} keyboardType='decimal-pad' style={{ marginTop:6, padding:8, borderRadius:8, backgroundColor: '#fff' }} />
+
+        <Text style={{ color: theme.text, marginTop:10 }}>Max concurrent trades</Text>
+        <TextInput value={maxTrades} onChangeText={setMaxTrades} keyboardType='numeric' style={{ marginTop:6, padding:8, borderRadius:8, backgroundColor: '#fff' }} />
+
+        <Text style={{ color: theme.text, marginTop:10 }}>Direction</Text>
+        <View style={{ flexDirection:'row', marginTop:6 }}>
+          {['Buy','Sell','Both'].map(d => (
+            <TouchableOpacity key={d} onPress={() => setDirection(d)} style={{ padding:8, marginRight:8, borderRadius:8, backgroundColor: direction===d ? theme.accent : 'transparent', borderWidth:1, borderColor: theme.text }}>
+              <Text style={{ color: direction===d ? theme.bg : theme.text }}>{d}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={{ flexDirection:'row', justifyContent:'space-between', marginTop:12 }}>
+          <View style={{ alignItems:'flex-start' }}>
+            <Text style={{ color: theme.text }}>Confirm before trade</Text>
+            <Switch value={confirmBeforeTrade} onValueChange={setConfirmBeforeTrade} />
+          </View>
+          <View style={{ alignItems:'flex-start' }}>
+            <Text style={{ color: theme.text }}>Re-open after TP</Text>
+            <Switch value={reopenAfterTP} onValueChange={setReopenAfterTP} />
+          </View>
+        </View>
+
+        <View style={{ flexDirection:'row', justifyContent:'space-around', marginTop:14 }}>
+          <TouchableOpacity onPress={() => { setRunning(true); /* connect to MT5 backend */ }} style={{ padding:12, borderRadius:8, backgroundColor: theme.accent }}>
+            <Text style={{ color: theme.bg }}>Start</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { setRunning(false); /* disconnect */ }} style={{ padding:12, borderRadius:8, backgroundColor: 'gray' }}>
+            <Text style={{ color: '#fff' }}>Stop</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { setOpenTradesCount(0); /* closeAll */ }} style={{ padding:12, borderRadius:8, backgroundColor: '#ff4444' }}>
+            <Text style={{ color: '#fff' }}>Close All</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={{ color: theme.text, marginTop:10 }}>Status: {running ? 'RUNNING' : 'STOPPED'}</Text>
+
+      </View>
+    </View>
+  </ScrollView>
+
+  <View style={{ padding:12, alignItems:'center' }}>
+    <Text style={{ color: theme.text, fontSize:12 }}>Humble Isti Trading Robot ©</Text>
+  </View>
+</View>
+
+); }
