@@ -1,0 +1,213 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+
+export default function App() {
+  const [connected, setConnected] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [theme, setTheme] = useState('blue');
+  const [broker, setBroker] = useState('');
+  const [login, setLogin] = useState('');
+  const [password, setPassword] = useState('');
+  const [symbols, setSymbols] = useState({
+    EURUSD: true,
+    GBPUSD: false,
+    USDJPY: true,
+    XAUUSD: true,
+    XRPUSD: false,
+    US30: true,
+  });
+
+  const toggleTheme = () => {
+    const next = theme === 'blue' ? 'green' : theme === 'green' ? 'purple' : 'blue';
+    setTheme(next);
+  };
+
+  const toggleSymbol = (sym) => {
+    setSymbols((prev) => ({ ...prev, [sym]: !prev[sym] }));
+  };
+
+  const connectToMT5 = () => {
+    if (broker && login && password) {
+      setConnected(true);
+    } else {
+      alert('Please fill in all MT5 connection details');
+    }
+  };
+
+  const disconnectMT5 = () => {
+    setConnected(false);
+  };
+
+  return (
+    <ScrollView
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            theme === 'blue'
+              ? '#001f3f'
+              : theme === 'green'
+              ? '#003300'
+              : '#220022',
+        },
+      ]}
+    >
+      <Text style={styles.title}>🤖 Humble Isti Trading Robot</Text>
+
+      {/* Connection Panel */}
+      <View style={styles.connectionCard}>
+        <Text style={styles.subtitle}>MT5 Account Connection</Text>
+        <TextInput
+          placeholder="Broker Server"
+          placeholderTextColor="#aaa"
+          style={styles.input}
+          value={broker}
+          onChangeText={setBroker}
+        />
+        <TextInput
+          placeholder="Login Number"
+          placeholderTextColor="#aaa"
+          style={styles.input}
+          keyboardType="numeric"
+          value={login}
+          onChangeText={setLogin}
+        />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#aaa"
+          style={styles.input}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        {connected ? (
+          <TouchableOpacity style={[styles.button, { backgroundColor: '#ff4136' }]} onPress={disconnectMT5}>
+            <Text style={styles.buttonText}>Disconnect</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={[styles.button, { backgroundColor: '#2ecc40' }]} onPress={connectToMT5}>
+            <Text style={styles.buttonText}>Connect</Text>
+          </TouchableOpacity>
+        )}
+
+        <Text style={styles.status}>
+          {connected ? '🟢 Connected to MT5' : '🔴 Not Connected'}
+        </Text>
+      </View>
+
+      {/* Trading Controls */}
+      {connected && (
+        <>
+          <Text style={styles.status}>
+            Trading Status: {running ? '🟢 Running' : '🔴 Stopped'}
+          </Text>
+
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: running ? '#ff4136' : '#2ecc40' }]}
+            onPress={() => setRunning(!running)}
+          >
+            <Text style={styles.buttonText}>
+              {running ? 'STOP TRADING' : 'START TRADING'}
+            </Text>
+          </TouchableOpacity>
+
+          <Text style={styles.subtitle}>Active Symbols</Text>
+          {Object.keys(symbols).map((sym) => (
+            <TouchableOpacity
+              key={sym}
+              style={[
+                styles.symbolButton,
+                { backgroundColor: symbols[sym] ? '#0074D9' : '#555' },
+              ]}
+              onPress={() => toggleSymbol(sym)}
+            >
+              <Text style={styles.symbolText}>
+                {sym} {symbols[sym] ? '✅' : '❌'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+
+          <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
+            <Text style={styles.themeText}>🎨 Change Theme</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      <Text style={styles.footer}>MT4 / MT5 | Works with Any Broker</Text>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  connectionCard: {
+    backgroundColor: '#111',
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 10,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  subtitle: {
+    color: 'white',
+    fontSize: 18,
+    marginVertical: 10,
+  },
+  input: {
+    backgroundColor: '#222',
+    color: 'white',
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 5,
+  },
+  button: {
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  status: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 5,
+  },
+  symbolButton: {
+    padding: 12,
+    marginVertical: 5,
+    borderRadius: 8,
+  },
+  symbolText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  themeButton: {
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#FF851B',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  themeText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  footer: {
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+});
